@@ -1,0 +1,1 @@
+player: player0,ai1,ai2

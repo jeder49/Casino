@@ -1,5 +1,7 @@
 package Poker;
 
+import java.util.Scanner;
+
 public class Player {
 	//attributes
 	private Mid mid;
@@ -7,22 +9,40 @@ public class Player {
 	private int role;
 	private int assets;
 	private int bet;
-	private boolean ai;
+	private int ai;
 	private boolean fold;
 	private boolean allIn;
 	
 	//constructor
-	public Player(boolean ai, Mid mid) {
+	public Player(int ai, Mid mid) {
 		setAi(ai);
 		this.setMid(mid);
 	}
 	
 	//what to do
 	public int decide() {
-		//bet
-		//raise
-		//falt
-		//all in
+		if(ai == 0) {
+			Scanner sc = new Scanner(System.in);
+			System.out.println("Do you want to: ");
+		
+			//bet
+			System.out.println("1. bet");
+		
+			//raise
+			System.out.println("2. raise");
+		
+			//fold
+			System.out.println("3. fold");
+		
+			//all in
+			System.out.println("4. go all in");
+		
+			int i = sc.nextInt();
+		
+			System.out.println("you choose: " + i);
+		}else {
+			//
+		}
 		return 0;
 	}
 	
@@ -52,11 +72,11 @@ public class Player {
 	public void setBet(int bet) {
 		this.bet = bet;
 	}
-	public boolean isAi() {
+	public int isAi() {
 		return ai;
 	}
-	public void setAi(boolean ai) {
-		this.ai = ai;
+	public void setAi(int ai2) {
+		this.ai = ai2;
 	}
 	public Card[] getHand() {
 		return hand;

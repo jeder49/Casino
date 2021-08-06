@@ -7,47 +7,40 @@ public class Game {
 	private int round;
 	private Mid mid;
 	
-	public Game(int numPlayer,int bots,int numMid,int numHand) {
+	public Game(int numPlayer, int bots, int numMid, int numHand, int assets, int dificulty[]) {
+		//while(a nother game){
+			mid = new Mid();
 		
-		mid = new Mid();
+			createPlayer(numPlayer, bots, assets, dificulty);
 		
-		createPlayer(numPlayer, bots);
+			deck = createDeck(null);
 		
-		deck = createDeck(null);
+			shuffle(deck);
 		
-		shuffle(deck);
+			deal(numMid, numHand);
 		
-		deal(numMid, numHand);
-		
-		for(int i = 0; i < player.length; i++) {
-			String s = "";
-			Card[] mid = this.mid.getCards();
-			for(int f = 0; f < this.mid.getCards().length; f++) {
-				if(mid[f] == null) {
-					s = s + null;
-				}else {
-					s = s + mid[f].toString() + " ; ";
-				}
+			for(int i = 0; i < this.mid.getCards().length; i++) {
+				Card[] mid = this.mid.getCards();
+				System.out.println("mid " + i + ": " + mid[i].toString());
 			}
-			System.out.println("mid " + i + ": " + s);
-		}
-		
-		for(int i = 0; i < player.length; i++) {
-			String s = "";
-			Card[] hand = player[i].getHand();
-			for(int f = 0; f < player[i].getHand().length; f++) {
-				if(hand[f] == null) {
-					s = s + null;
-				}else {
-					s = s + hand[f].toString() + " ; ";
+			
+			for(int i = 0; i < player.length; i++) {
+				String s = "";
+				Card[] hand = player[i].getHand();
+				for(int f = 0; f < player[i].getHand().length; f++) {
+					if(hand[f] == null) {
+						s = s + null;
+					}else {
+						s = s + hand[f].toString() + " ; ";
+					}
 				}
+				System.out.println("Player " + i + ": " + s);
 			}
-			System.out.println("Player " + i + ": " + s);
-		}
-		setRound(1);
-		round(numMid);
+			setRound(1);
+			round(numMid);
 		
-		win();
+			//win();
+		//}
 	}
 	
 	
@@ -84,7 +77,7 @@ public class Game {
 	
 	
 	//
-	private void createPlayer(int numPlayer, int bots) {
+	private void createPlayer(int numPlayer, int bots, int assets, int dificulty[]) {
 		//set random position for bots
 		int[] botPosition = new int[bots];
 		for(int i = 0; i < bots; i++) {
@@ -97,15 +90,18 @@ public class Game {
 		for(int i = 0; i < numPlayer; i++) {
 			
 			//looks if position is taken by bot
-			boolean b = false;
+			int dificultyBot = 0;
+			int indexBot = 0;
 			for(int f = 0; f < bots; f++) {
 				if(botPosition[f] == i) {
-					b = true;
+					dificultyBot = dificulty[indexBot];
+					indexBot++;
 				}
 			}
 			
 			//creates player
-			player[i] = new Player(b,mid);
+			player[i] = new Player(dificultyBot,mid);
+			player[i].setAssets(assets);
 		}
 	}
 	
@@ -113,9 +109,12 @@ public class Game {
 	//deal the cards
 	private void deal(int numMid, int numHand) {
 		Card[] mid = new Card[numMid];
+		boolean[] visible = new boolean[numMid];
 		for(int i = 0; i < mid.length; i++) {
 			mid[i] = getTopCard();
+			visible[i] = false;
 		}
+		this.mid.setVisible(visible);
 		this.mid.setCards(mid);
 		
 		for(int i = 0; i < player.length; i++) {
@@ -142,15 +141,59 @@ public class Game {
 		return card;
 	}
 	
+	public void changePositionPlayer(){
+		//to do
+	}
 	
 	//
 	private void round(int numMid){
 		
-		//recursion ends when...
+		//set role
 		
+		//get small blind
+		int index = getPlayerByrole(1);
+		
+		//if no round was played before and new roles has to be made
+		if(index == -1) {
+			
+			player[0].setRole(1);
+			player[1].setRole(2);
+		
+		}else {
+			
+			for(int i = 1; i < 3; i++) {
+			
+				if((index+1) > player.length) {
+					
+					index++;
+					player[index].setRole(i);
+				
+				}else {
+				
+					index = 0;
+					player[index].setRole(i);
+				
+				}
+
+			}
+			
+		}
+		
+		//first bets
+		if(round == 1) {
+			
+			//bet small blind
+			player[getPlayerByrole(1)].setBet(1);
+			
+			//bet big blind
+			player[getPlayerByrole(2)].setBet(2);
+		}
+		
+		//recursion ends when...
 		//...last man standing
-		if(Oneleft()) {
-			return;
+		if(howManyleft() == 1) {
+			round++;
+			round(numMid);
 		}
 		
 		//...all in
@@ -165,12 +208,23 @@ public class Game {
 			return;
 		}
 		
+		//turn cards
+		if(round == 2) {
+			mid.setVisible(0, true);
+			mid.setVisible(1, true);
+			mid.setVisible(2, true);
+		}if(round > 2) {
+			mid.setVisible(round, true);
+		}
+		System.out.println(sameBetHight());
 		//till all bets are the same height
-		while(!sameBetHight() && !Oneleft()) {
+		while(!sameBetHight() && howManyleft() != 1) {
+			
 			//goes to all player
 			for(int i = 0; i < player.length; i++) {
 				player[i].decide();
 			}
+			
 		}
 		
 		//recursion
@@ -180,10 +234,19 @@ public class Game {
 	
 	//BEGIN help methods [round]
 	//
+	private int getPlayerByrole(int role){
+		for(int i = 0; i < player.length; i++) {
+			if(role == player[i].getRole()) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
 	private boolean sameBetHight() {
 		int max = playerWithHightestBet();
 		for(int i = 0; i < player.length; i++) {
-			if(player[i].getBet() < max && !player[i].hasFolded()) {
+			if(player[i].getBet() != max && !player[i].hasFolded()) {
 				return false;
 			}
 		}
@@ -202,8 +265,14 @@ public class Game {
 		return index;
 	}
 	
-	private boolean Oneleft() {
-		return false;
+	private int howManyleft() {
+		int num = 0;
+		for(int i = 0; i < player.length; i++) {
+			if(!player[i].hasFolded()) {
+				num++;
+			}
+		}
+		return num;
 	}
 	
 	private boolean isAllIn() {

@@ -12,7 +12,9 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		new Game(2,1,5,2);
+		int[] dificulty = new int[1];
+		dificulty[0] = 1;
+		new Game(2,1,5,2,375,dificulty);
 	}
 
 }
