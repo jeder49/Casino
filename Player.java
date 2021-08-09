@@ -149,22 +149,21 @@ public class Player {
 		return 0;
 	}
 	
-	// Value the players hand cards according to an array of given community cards ('mid' cards)
 	public long checkCombo(Mid middle) {
 		
 		/*
 		 * Combinations (ranked from best to worst):
 		 * 
 		 * Straight Flush (+Royal Flush) -	90.000.000.000 + [value of highest straight card] *100.000.000
-		 * Four of a Kind (quad) - 		80.000.000.000 + [value of quad card] 		  *100.000.000 + [value of highest non-quad card]
-		 * Full House - 			70.000.000.000 + [value of highest triple card]	  *100.000.000 + [value of highest non-triple pair card] *1.000.000
-		 * Flush - 				60.000.000.000 + [value of highest flush card]	  *100.000.000 + [value of second highest flush card]	 *1.000.000 + ...
-		 * Straight - 				50.000.000.000 + [value of highest straight card] *100.000.000
-		 * Three of a Kind (triple) - 		40.000.000.000 + [value of triple card]		  *100.000.000 + [value of highest non-triple card]	 *1.000.000
-		 * Double Pair - 			30.000.000.000 + [value of highest pair card] 	  *100.000.000 + [value of second highest pair card] 	 *1.000.000 + [value of highest non-pair card] *10.000
-		 * Pair - 				20.000.000.000 + [value of pair card]		  *100.000.000 + [value of highest non-pair card]	 *1.000.000 + ... 										+ [value of third highest non-pair card]*100
-		 * High Card - 				10.000.000.000 + [value of High Card]		  *100.000.000 + [value of second highest card]		 *1.000.000 + ...
-		 * 
+		 * Four of a Kind (quad) - 			80.000.000.000 + [value of quad card] 			  *100.000.000 + [value of highest non-quad card]
+		 * Full House - 					70.000.000.000 + [value of highest triple card]	  *100.000.000 + [value of highest non-triple pair card] *1.000.000
+		 * Flush - 							60.000.000.000 + [value of highest flush card]	  *100.000.000 + [value of second highest flush card]	 *1.000.000 + ...
+		 * Straight - 						50.000.000.000 + [value of highest straight card] *100.000.000
+		 * Three of a Kind (triple) - 		40.000.000.000 + [value of triple card]		  	  *100.000.000 + [value of highest non-triple card]	 	 *1.000.000
+		 * Double Pair - 					30.000.000.000 + [value of highest pair card] 	  *100.000.000 + [value of second highest pair card] 	 *1.000.000 + [value of highest non-pair card] *10.000
+		 * Pair - 							20.000.000.000 + [value of pair card]		  	  *100.000.000 + [value of highest non-pair card]	 	 *1.000.000 + ... 										+ [value of third highest non-pair card]*100
+		 * High Card - 						10.000.000.000 + [value of High Card]		  	  *100.000.000 + [value of second highest card]		 	 *1.000.000 + ...
+		 * 			
 		 */
 		boolean straight_flush = false;
 		boolean quad = false;
@@ -255,7 +254,7 @@ public class Player {
 					same_kind_length = 1;
 					if(straight_length == 5) {
 						straight = true;
-						straight_high_cards[index_straight_high_cards] = i-4;
+						straight_high_cards[index_straight_high_cards] = i-3;
 						index_straight_high_cards++;
 						straight_length--;
 					}
@@ -326,24 +325,167 @@ public class Player {
 		}
 		//Triple
 		if(triple) {
-			return 40000000000L + (long)(combo[triple_index].getValue())*100000000L;
+			long value = 40000000000L + (long)(combo[triple_index].getValue())*100000000L;
+			long multiplicator = 1000000L;
+			for(int i = 0; i<comboLength; i++) {
+				if(i == triple_index) {
+					i += 2;
+					continue;
+				}
+				value += (long)(combo[i].getValue())*multiplicator;
+				multiplicator /= 100;
+				if(multiplicator == 100L) {
+					return value;
+				}
+			}
 		}
 		//Double-Pair
 		if(double_pair) {
-			return 30000000000L + (long)(combo[pair_indices[0]].getValue())*100000000L + (long)(combo[pair_indices[1]].getValue())*1000000L;
+			long value =  30000000000L + (long)(combo[pair_indices[0]].getValue())*100000000L + (long)(combo[pair_indices[1]].getValue())*1000000L;
+			long multiplicator = 1000000L;
+			for(int i = 0; i<comboLength; i++) {
+				if(i == pair_indices[0] || i == pair_indices[1]) {
+					i += 1;
+					continue;
+				}
+				return value + (long)(combo[i].getValue())*10000L;
+			}
 		}
 		//Pair
 		if(pair) {
-			return 20000000000L + (long)(combo[pair_indices[0]].getValue())*100000000L;
+			long value = 20000000000L + (long)(combo[pair_indices[0]].getValue())*100000000L;
+			long multiplicator = 1000000L;
+			for(int i = 0; i<comboLength; i++) {
+				if(i == pair_indices[0]) {
+					i += 1;
+					continue;
+				}
+				value += (long)(combo[i].getValue())*multiplicator;
+				multiplicator /= 100;
+				if(multiplicator == 100L) {
+					return value;
+				}
+			}
 		}
 		//High Card
 		else {
 			return 10000000000L + (long)(combo[0].getValue())*100000000L + (long)(combo[1].getValue())*1000000L + (long)(combo[2].getValue()*10000L) + (long)(combo[3].getValue()*100L) + (long)(combo[4].getValue()*1L);
 		}
+		
+		//This case should not occurr
+		return -1L;
 	}
 	
+	//Outputs a double array containing the probability for win, tie or lose for an incomplete combination considering what the opponent might have
 	public double[] getChance() {
+		// !!! Note that this function assumes that the middle contains 5 community cards and that every player has 2 hand cards (Texas Hold'em) !!!
 		double[] chance = new double[3];
+		int[] wins_ties_loses = new int[3];
+		int simulations = 10000;
+		int players = 2;
+
+		
+		/*
+		 * Prepare the simulation
+		 */
+		//Create a deck not including the hand and mid cards
+		Card[] exceptions = new Card[hand.length+mid.numberOfVisibleCards()];
+		int exception_index = 0;
+		for(int i = 0; i<mid.numberOfVisibleCards(); i++) {
+			exceptions[exception_index] = mid.getCards()[i];
+			exception_index++;
+		}
+		for(int i = 0; i<hand.length; i++) {
+			exceptions[exception_index] = hand[i];
+			exception_index++;
+		}
+		Card[] deck = Game.createDeck(exceptions);
+		
+		//Create an array of the community cards (mid cards) leaving room for simulated cards from deck at the last indices of the array
+		Card[] simulated_middle_cards = new Card[5];
+		for(int i = 0; i<mid.numberOfVisibleCards(); i++) {
+			simulated_middle_cards[i] = exceptions[i];
+		}
+		Mid simulated_mid = new Mid();
+		simulated_mid.setCards(simulated_middle_cards);
+		
+		//Create an opponent with simualted hand
+		Player simulated_opponent = new Player(false,  mid);
+		Card[] opponents_cards = new Card[2];
+		
+		
+		/*
+		 * Starts the simulation
+		 */
+		int deck_index = 0;
+		for(int i = 0; i<simulations; i++) {
+			
+			Game.shuffle(deck);
+			//Check if players hand cards need to be filled
+			if(hand == null) {
+				hand = new Card[2];
+				for(int j = 0; j<2; j++) {
+					hand[j] = deck[deck_index];
+					deck_index++;
+				}
+			}
+			
+			//Creates a possible hand for the opponent
+			for(int j = 0; j<2; j++) {
+				opponents_cards[j] = deck[deck_index];
+				deck_index++;
+			}
+			simulated_opponent.setHand(opponents_cards);
+			
+			//Fills the simulated middle
+			for(int j = mid.numberOfVisibleCards(); j<5; j++) {
+				simulated_middle_cards[j] = deck[deck_index];
+				deck_index++;
+			}
+			simulated_mid.setCards(simulated_middle_cards);
+			
+			//Uncomment for DEBUG
+			/*
+			System.out.println("Your cards: ");
+			for(int j = 0; j<hand.length;j++) {
+				System.out.println(hand[j]);
+			}
+			System.out.println("Opponents cards: ");
+			for(int j = 0; j<simulated_opponent.getHand().length;j++) {
+				System.out.println(simulated_opponent.getHand()[j]);
+			}
+			System.out.println("Mid cards: ");
+			for(int j = 0; j<simulated_mid.getCards().length;j++) {
+				System.out.println(simulated_mid.getCards()[j]);
+			}
+			System.out.println("You have a "+checkCombo(simulated_mid)+" & the opponent has a "+simulated_opponent.checkCombo(simulated_mid));
+			*/
+			
+			//Compare both outcomes
+			if(checkCombo(simulated_mid) > simulated_opponent.checkCombo(simulated_mid)) {
+				wins_ties_loses[0]++;
+			} else if(checkCombo(simulated_mid) == simulated_opponent.checkCombo(simulated_mid)) {
+				wins_ties_loses[1]++;
+			} else {
+				wins_ties_loses[2]++;
+			}
+			
+			//Reset variables
+			deck_index = 0;
+		}
+		
+		//Print out probabilities
+		/*
+		System.out.println((double)(6000)/10000);
+		chance[0] = (double)(wins_ties_loses[0])/10000;
+		chance[1] = (double)(wins_ties_loses[1])/10000;
+		chance[2] = (double)(wins_ties_loses[2])/10000;
+		System.out.println("probability of winning: "+chance[0]);
+		System.out.println("probability of a tie: "+chance[1]);
+		System.out.println("probability of losing: "+chance[2]);
+		System.out.println("Sum: "+(chance[0]+chance[1]+chance[2]));
+		*/
+		
 		return chance;
 	}
 	
