@@ -155,14 +155,14 @@ public class Player {
 		 * Combinations (ranked from best to worst):
 		 * 
 		 * Straight Flush (+Royal Flush) -	90.000.000.000 + [value of highest straight card] *100.000.000
-		 * Four of a Kind (quad) - 			80.000.000.000 + [value of quad card] 			  *100.000.000 + [value of highest non-quad card]
-		 * Full House - 					70.000.000.000 + [value of highest triple card]	  *100.000.000 + [value of highest non-triple pair card] *1.000.000
-		 * Flush - 							60.000.000.000 + [value of highest flush card]	  *100.000.000 + [value of second highest flush card]	 *1.000.000 + ...
-		 * Straight - 						50.000.000.000 + [value of highest straight card] *100.000.000
-		 * Three of a Kind (triple) - 		40.000.000.000 + [value of triple card]		  	  *100.000.000 + [value of highest non-triple card]	 	 *1.000.000
-		 * Double Pair - 					30.000.000.000 + [value of highest pair card] 	  *100.000.000 + [value of second highest pair card] 	 *1.000.000 + [value of highest non-pair card] *10.000
-		 * Pair - 							20.000.000.000 + [value of pair card]		  	  *100.000.000 + [value of highest non-pair card]	 	 *1.000.000 + ... 										+ [value of third highest non-pair card]*100
-		 * High Card - 						10.000.000.000 + [value of High Card]		  	  *100.000.000 + [value of second highest card]		 	 *1.000.000 + ...
+		 * Four of a Kind (quad) - 		80.000.000.000 + [value of quad card] 		  *100.000.000 + [value of highest non-quad card]
+		 * Full House - 			70.000.000.000 + [value of highest triple card]	  *100.000.000 + [value of highest non-triple pair card] *1.000.000
+		 * Flush - 				60.000.000.000 + [value of highest flush card]	  *100.000.000 + [value of second highest flush card]	 *1.000.000 + ...
+		 * Straight - 				50.000.000.000 + [value of highest straight card] *100.000.000
+		 * Three of a Kind (triple) - 		40.000.000.000 + [value of triple card]		  *100.000.000 + [value of highest non-triple card]	 *1.000.000
+		 * Double Pair - 			30.000.000.000 + [value of highest pair card] 	  *100.000.000 + [value of second highest pair card] 	 *1.000.000 + [value of highest non-pair card] *10.000
+		 * Pair - 				20.000.000.000 + [value of pair card]		  *100.000.000 + [value of highest non-pair card]	 *1.000.000 + ... 					+ [value of third highest non-pair card]*100
+		 * High Card - 				10.000.000.000 + [value of High Card]		  *100.000.000 + [value of second highest card]		 *1.000.000 + ...
 		 * 			
 		 */
 		boolean straight_flush = false;
