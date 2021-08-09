@@ -121,7 +121,7 @@ public class Game {
 	
 	
 	//shuffles the cards of the deck
-	public void shuffle(Card[] deck) {
+	public static void shuffle(Card[] deck) {
 		for(int i = 0; i<deck.length; i++) {
 			int randomPosition = (int)(Math.random()*52);
 			Card c1 = deck[i];
