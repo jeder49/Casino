@@ -38,7 +38,11 @@ public class Card implements Comparable {
 		} else if(this.value < card.value) {
 			return 1;
 		} else {
-			return 0;
+			if(this.color > card.color) {
+				return -1;
+			} else {
+				return 1;
+			}
 		}
 	}
 	
