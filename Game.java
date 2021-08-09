@@ -94,10 +94,10 @@ public class Game {
 			deck = new Card[52];
 		} else {
 			deck = new Card[52-exceptions.length];
+			Arrays.sort(exceptions);
 		}
 
 		//Fills the deck from highest to lowest value while checking for exceptions
-		Arrays.sort(exceptions);
 		int index = 0;
 		int exception_index = 0;
 
