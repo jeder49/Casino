@@ -3,6 +3,7 @@ package Poker;
 public class Mid {
 	private Card[] cards;
 	private boolean[] visible;
+	private List<Pot> pot = new ArrayList<Pot>();
 	public Mid() {
 	}
 	public int numberOfVisibleCards() {
@@ -29,5 +30,17 @@ public class Mid {
 	public void setVisible(int index, boolean visible) {
 		this.visible[index] = visible;
 	}
-
+	public Pot getPot(int index) {
+		return pot.get(index);
+	}
+	public void addPot(Pot pot) {
+		this.pot.add(pot);
+	}
+	public boolean hasPot() {
+		if(pot == null) {
+			return false;
+		}
+		boolean hasPot = !pot.isEmpty();
+		return hasPot;
+	}
 }
