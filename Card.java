@@ -2,14 +2,21 @@ package Poker;
 
 import java.awt.image.BufferedImage;
 
-public class Card {
 
+public class Card implements Comparable {
 	
+	/*
+	 * Attributes
+	 */
 	private int value;
 	private int color;
 	private String image_path;
 	private BufferedImage image;
 	
+	
+	/*
+	 * Constructors
+	 */
 	public Card(int value, int color, String image_path) {
 		this.setValue(value);
 		this.setColor(color);
@@ -18,8 +25,27 @@ public class Card {
 		// TODO: Create BufferedImage
 	}
 	
+	
+	/*
+	 * Helpful Shit
+	 */
+	@Override
+	public int compareTo(Object o) {
+		// !!! Function is used to sort from highest to lowest -> outcome is reversed !!!
+		Card card = (Card)o;
+		if(this.value > card.value) {
+			return -1;
+		} else if(this.value < card.value) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+	
+	
 	public String toString() {
 		String name = "";
+		//Convert Color to String
 		switch(this.color) {
 			case 0:
 				name += "Herz-";
@@ -34,6 +60,7 @@ public class Card {
 				name += "Pik-";
 				break;
 		}
+		//Convert Value to String
 		switch(this.value) {
 			case 0:
 				name += "2";
@@ -77,6 +104,7 @@ public class Card {
 		}
 		return name;
 	}
+	
 	
 	/*
 	 * Getter- & Setter-Methods
