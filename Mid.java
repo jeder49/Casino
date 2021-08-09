@@ -5,6 +5,15 @@ public class Mid {
 	private boolean[] visible;
 	public Mid() {
 	}
+	public int numberOfVisibleCards() {
+		int visible_cards = 0;
+		for(int i = 0; i<visible.length; i++) {
+			if(visible[i]) {
+				visible_cards++;
+			}
+		}
+		return visible_cards;
+	}
 	public Card[] getCards() {
 		return cards;
 	}
