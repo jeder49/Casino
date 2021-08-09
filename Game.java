@@ -86,19 +86,34 @@ public class Game {
 	
 	
 	//creates a deck
-	public Card[] createDeck(Card[] exceptions) {
+	public static Card[] createDeck(Card[] exceptions) {
+		//Creates the array to be filled
 		Card[] deck;
+		//Specifies the length according to the amount of exceptions(cards that should not be in the deck)
 		if(exceptions == null) {
 			deck = new Card[52];
 		} else {
 			deck = new Card[52-exceptions.length];
 		}
 		
+		//Fills the deck from highest to lowest value while checking for exceptions
+		Arrays.sort(exceptions);
 		int index = 0;
-		for(int i = 0; i<13; i++) {
-			for(int j = 0; j<4; j++) {
-				deck[index] = new Card(i, j, i+"."+j);
-				index++;
+		int exception_index = 0;
+		
+		for(int i = 12; i>=0; i--) {
+			for(int j = 3; j>=0; j--) {
+				try {
+					if(i == exceptions[exception_index].getValue() && j == exceptions[exception_index].getColor()) {
+						exception_index++;
+					} else {
+						deck[index] = new Card(i, j, i+"."+j);
+						index++;
+					}
+				} catch(ArrayIndexOutOfBoundsException e) {
+					deck[index] = new Card(i, j, i+"."+j);
+					index++;
+				}
 			}
 		}		
 		return deck;
