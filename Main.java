@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package Poker;
 
 /**
- * @author Frei
- *
+ * @author jeder48
+ * @author jeder49
+ * Version: 4.0
+ * date: 21:10 09/08/21
  */
 public class Main {
 	/**
