@@ -1,11 +1,13 @@
 package Poker;
 
 public class Mid {
-	private Card[] cards;
+	private Card[] card;
 	private boolean[] visible;
 	private List<Pot> pot = new ArrayList<Pot>();
+
 	public Mid() {
 	}
+
 	public int numberOfVisibleCards() {
 		int visible_cards = 0;
 		for(int i = 0; i<visible.length; i++) {
@@ -16,10 +18,10 @@ public class Mid {
 		return visible_cards;
 	}
 	public Card[] getCards() {
-		return cards;
+		return card;
 	}
-	public void setCards(Card[] cards) {
-		this.cards = cards;
+	public void setCards(Card[] card) {
+		this.card = card;
 	}
 	public boolean[] isVisible() {
 		return visible;
