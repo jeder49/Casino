@@ -395,7 +395,7 @@ public class Game {
 		//get best combination of all player, who showed their cards
 		int max = lastRaised;
 		for(int i = 0; i < player.length; i++) {
-			if(player[i].showedCards() && !player[i].hasFolded() && player[i].checkCombo() > player[max].checkCombo()) {
+			if(player[i].showedCards() && !player[i].hasFolded() && player[i].checkCombo(mid) > player[max].checkCombo(mid)) {
 				max = i;
 			}
 		}
