@@ -230,9 +230,9 @@ public class Player {
 				System.out.println("[Ai]: I choose you!");
 			}
 			return -1;
-		}	
+		}
 
-	public long checkCombo() {
+	public long checkCombo(Mid middle) {
 
 		/*
 		 * Combinations (ranked from best to worst):
@@ -260,18 +260,18 @@ public class Player {
 		/*
 		 * Preparing input data
 		 */
-		int comboLength = mid.getCards().length + hand.length;	//Amount of cards which can be used to create a combination
+		int comboLength = middle.getCards().length + hand.length;	//Amount of cards which can be used to create a combination
 
 		// If cards have not been turned yet (no combo possible)
-		if(mid.getCards() == null) {
+		if(middle.getCards() == null) {
 			return 0;
 		}
 
 		// Create Combo out of mid & hand cards and sorts them according to their value
 		int index = 0;
 		Card[] combo = new Card[comboLength];
-		for(int i = 0; i<mid.getCards().length; i++) {
-			combo[index] = mid.getCards()[i];
+		for(int i = 0; i<middle.getCards().length; i++) {
+			combo[index] = middle.getCards()[i];
 			index++;
 		}
 		for(int i = 0; i<hand.length; i++) {
