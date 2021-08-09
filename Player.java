@@ -14,146 +14,229 @@ public class Player {
 	private boolean fold;
 	private boolean allIn;
 	private boolean showCards;
-	
+
 	//constructor
 	public Player(String name, int ai, Mid mid) {
 		setAi(ai);
 		setMid(mid);
 		setName(name);
 	}
-	
+
 	//what to do
-	//get priviouse player to compare bet
-	public int decide(Player p) {
-		if(ai == 0) {
-			Scanner sc = new Scanner(System.in);
-			
-			int value;
-			
-			if(p != null) {
-				//value for own bet
-				value = p.getBet();
-			}else {
-				value = getBet();
-			}
-			
-			boolean b = true;
-			while(b) {
-				System.out.println("Do you want to: ");
-				
-				//there is no player before this player this round
-				if(p == null) {
-					//check
-					System.out.println("check");
-					
-					//bet
-					System.out.println("bet");
-					
-					//fold
-					System.out.println("fold");
-					
-					//all in
-					System.out.println("allIn");
-				}else {
-					if(p.getBet() <= getBet()+getAssets()) {
-						//call
-						System.out.println("call");
-					
-						//raise
-						System.out.println("raise");
+		//get priviouse player to compare bet
+		public int decide(Player p) {
+			if(ai == 0) {
+				Scanner sc = new Scanner(System.in);
+
+				int value;
+
+				if(p != null) {
+					//value for own bet
+					if(!p.isAllIn()) {
+						value = p.getBet();
+					}else {
+						value = getAssets();
 					}
-					
-					//fold
-					System.out.println("fold");
-					
-					//all in
-					System.out.println("allIn");
+				}else {
+					value = getBet();
 				}
-				System.out.print("[" + name + "] chooses: ");
-				String s = sc.next();
-				
-				switch(s) {
-					case "call":
-						if(p != null) {
-							setBet(value);
-							return 0;
-						}else {
-							System.out.println("Don't try to mess with the Casino!");
+
+				boolean b = true;
+				while(b) {
+					System.out.println("+----------------------+");
+					System.out.println("|Do you want to:       |");
+
+					//there is no player before this player this round
+					if(p == null) {
+						//check
+						System.out.println("|+ check	       |");
+
+						//bet
+						System.out.println("|+ bet		       |");
+
+						//fold
+						System.out.println("|+ fold		       |");
+
+						//all in
+						System.out.println("|+ allIn	       |");
+					}else {
+						if(p.getBet() <= getAssets() && !p.isAllIn()) {
+							//call
+							System.out.println("|+ call	           |");
+
+							//raise
+							System.out.println("|+ raise	       |");
 						}
-					break;
-					case "raise":
-						if(p != null) {
-							System.out.println("raise to: ");
-							int input = sc.nextInt();
-							//if raise is lower than the bet player has to choose again
-							if(input < p.getBet()) {
-								b = true;
-							}
-							//all in
-							else if(input > getBet()+getAssets()) {
-								value = getBet()+getAssets();
+
+						//fold
+						System.out.println("|+ fold	       	   |");
+
+						//all in
+						System.out.println("|+ allIn	       |");
+					}
+					System.out.print("[" + name + "] chooses: ");
+					String s = sc.next();
+					System.out.println("+----------------------+");
+
+					switch(s) {
+						case "call":
+							if(p != null) {
+								setAssets(getAssets() - (value - getBet()));
 								setBet(value);
+								return 0;
+							}else {
+								System.out.println("Don't try to mess with the Casino!");
+							}
+						break;
+						case "raise":
+							if(p != null) {
+								System.out.println("raise to: ");
+								int input = sc.nextInt();
+								//if raise is lower than the bet player has to choose again
+								if(input < p.getBet()) {
+									b = true;
+								}
+								//all in
+								else if(input > getBet() + getAssets()) {
+									//get every thing you bet before
+									setAssets(getBet() + getAssets());
+									//bet is set to 0
+									setBet(0);
+									//set all in
+									setAllIn(true);
+									//create a pot
+									Pot pot = new Pot(getAssets());
+									//add player to pot -> player puts all his money in the pot
+									pot.addPlayer(this);
+									//add pot in the mid so that everyone can join
+									mid.addPot(pot);
+									return 3;
+								}
+								//normal raise
+								else {
+									//set bet
+									setBet(input);
+									//subtract asset
+									setAssets(getAssets() - input);
+									return 1;
+								}
+							}else {
+								System.out.println("Don't try to mess with the Casino!");
+							}
+						break;
+						case "fold":
+							setFold(true);
+							return 2;
+						case "allIn":
+							//get every thing you bet before
+							setAssets(getBet() + getAssets());
+							//bet is set to 0
+							setBet(0);
+							//set all in
+							setAllIn(true);
+							if(!mid.hasPot()) {
+								//create a pot
+								Pot pot = new Pot(getAssets());
+								//add player to pot -> player puts all his money in the pot
+								pot.addPlayer(this);
+								//add pot in the mid so that everyone can join
+								mid.addPot(pot);
+								return 3;
+							}else {
+								int i = 0;
+								while(mid.getPot(i) != null) {
+									if(mid.getPot(i).getBetHight() > getAssets()) {
+										mid.getPot(i).addPlayer(this);
+									}else {
+										mid.getPot(i).addPlayer(this);
+										return 3;
+									}
+									i++;
+								}
+								if(getAssets() > 0) {
+									//create a pot
+									Pot pot = new Pot(getAssets());
+									//add player to pot -> player puts all his money in the pot
+									pot.addPlayer(this);
+									//add pot in the mid so that everyone can join
+									mid.addPot(pot);
+								}
 								return 3;
 							}
-							//normal raise
-							else {
-								setBet(input);
-								return 1;
-							}	
-						}else {
-							System.out.println("Don't try to mess with the Casino!");
+
+						case "check":
+							if(p == null) {
+								return 4;
+							}else {
+								System.out.println("Don't try to mess with the Casino!");
+							}
+						break;
+						case "bet":
+							if(p == null) {
+								System.out.println("you choose: ");
+								value = sc.nextInt();
+								if(value < 0) {
+									System.out.println("Don't try to mess with the Casino!");
+								}else if(value > getAssets()) {
+									//get every thing you bet before
+									setAssets(getBet() + getAssets());
+									//bet is set to 0
+									setBet(0);
+									//set all in
+									setAllIn(true);
+									//create a pot
+									Pot pot = new Pot(getAssets());
+									//add player to pot -> player puts all his money in the pot
+									pot.addPlayer(this);
+									//add pot in the mid so that everyone can join
+									mid.addPot(pot);
+									return 3;
+								}else {
+									setAssets(getAssets() - value);
+									setBet(value);
+									return 5;
+								}
+							}else {
+								System.out.println("Don't try to mess with the Casino!");
+							}
+						break;
+					}
+				}
+			}else {
+				switch(ai) {
+					case 1:
+						//level 1: random
+						boolean b = false;
+						while(b) {
+							int random = (int)(Math.random()*5);
+							if(p==null) {
+
+							}
 						}
 					break;
-					case "fold":
-						setFold(true);
-						return 2;
-					case "allIn":
-						value = getBet()+getAssets();
-						setBet(value);
-						return 3;
-					case "check":
-						if(p == null) {
-							setBet(value);
-							return 4;
-						}else {
-							System.out.println("Don't try to mess with the Casino!");
-						}
+					case 2:
+						//level 2: normal (when checkcombo/chance >= ...)
+						;
 					break;
-					case "bet":
-						if(p == null) {
-							System.out.println("you choose: ");
-							value = sc.nextInt();
-							setBet(value);
-							return 5;
-						}else {
-							System.out.println("Don't try to mess with the Casino!");
-						}
+					case 3:
+						//level3: OP(sees every thing, only plays when he wins)
+						;
+					break;
+					case 4:
+						//level4: OP(sees every thing, can bluff)
+						;
 					break;
 				}
+				System.out.println("[Ai]: I choose you!");
 			}
-		}else {
-			//level 1: random
-			
-			//level 2: normal
-			
-			//level3: OP(sees every thing, only plays when he wins)
-			
-			//level4: OP(sees every thing, can bluff)
-			System.out.println("[Ai]: I choose you!");
-		
-		}
-		return -1;
-	}	
+			return -1;
+		}	
 
-	public int getBest() {
-		return 0;
-	}
-	
-	public long checkCombo(Mid middle) {
-		
+	public long checkCombo() {
+
 		/*
 		 * Combinations (ranked from best to worst):
-		 * 
+		 *
 		 * Straight Flush (+Royal Flush) -	90.000.000.000 + [value of highest straight card] *100.000.000
 		 * Four of a Kind (quad) - 		80.000.000.000 + [value of quad card] 		  *100.000.000 + [value of highest non-quad card]
 		 * Full House - 			70.000.000.000 + [value of highest triple card]	  *100.000.000 + [value of highest non-triple pair card] *1.000.000
@@ -163,7 +246,7 @@ public class Player {
 		 * Double Pair - 			30.000.000.000 + [value of highest pair card] 	  *100.000.000 + [value of second highest pair card] 	 *1.000.000 + [value of highest non-pair card] *10.000
 		 * Pair - 				20.000.000.000 + [value of pair card]		  *100.000.000 + [value of highest non-pair card]	 *1.000.000 + ... 					+ [value of third highest non-pair card]*100
 		 * High Card - 				10.000.000.000 + [value of High Card]		  *100.000.000 + [value of second highest card]		 *1.000.000 + ...
-		 * 			
+		 *
 		 */
 		boolean straight_flush = false;
 		boolean quad = false;
@@ -172,23 +255,23 @@ public class Player {
 		boolean triple = false;
 		boolean double_pair = false;
 		boolean pair = false;
-		
-		
+
+
 		/*
 		 * Preparing input data
 		 */
-		int comboLength = middle.getCards().length + hand.length;	//Amount of cards which can be used to create a combination
-		
+		int comboLength = mid.getCards().length + hand.length;	//Amount of cards which can be used to create a combination
+
 		// If cards have not been turned yet (no combo possible)
-		if(middle.getCards() == null) {
+		if(mid.getCards() == null) {
 			return 0;
 		}
-		
+
 		// Create Combo out of mid & hand cards and sorts them according to their value
 		int index = 0;
 		Card[] combo = new Card[comboLength];
-		for(int i = 0; i<middle.getCards().length; i++) {
-			combo[index] = middle.getCards()[i];
+		for(int i = 0; i<mid.getCards().length; i++) {
+			combo[index] = mid.getCards()[i];
 			index++;
 		}
 		for(int i = 0; i<hand.length; i++) {
@@ -204,18 +287,18 @@ public class Player {
 		int[][] color_card_indices = new int[4][comboLength];	//1-Dimension specifies the colors; 2-Dimension saves the indices of the accordingly colored cards
 		int[] colors = new int[4];	//Saves the amount of cards belonging to a color
 		int flush_color = 0;
-		
+
 		int[] straight_high_cards = new int[comboLength-4];   //Used to save the indices of high cards of possible straights; important to later check for straight flushs which high card is lower than the high card of the highest straight
 		int index_straight_high_cards = 0;	//Used as index for straight_high_cards
 		int straight_length = 1;	//Used to store the length of the array of consecutively lower (straight) cards
-		
+
 		int[] pair_indices = new int[comboLength/2];	//Used to store the indices of pair cards
 		int pair_index = 0;		//Used as index for pair_indices
 		int triple_index = 0;	//Used to store the index of a triple card; While two triples are possible in a deck of 7 cards, unlike with pairs, the highest triple is always required for the strongest combo (Three of a Kind & Full House)
 		int quad_index = 0;		//Used to store the index of quad cards
 		int same_kind_length = 1;	//Used to save the number of cards with the same value
-		
-		
+
+
 		for(int i = 0; i<combo.length; i++) {
 			//Gather information to check for (straight) flush
 			color_card_indices[combo[i].getColor()][colors[combo[i].getColor()]] = i;
@@ -229,21 +312,21 @@ public class Player {
 					color_card_indices[flush_color][6] = -1;
 				}
 			}
-			
+
 			/*
 			 * Gather information to check for straight:
-			 * 
+			 *
 			 * [1] If the element at the next positions (if exists) has a value one lower than the current element
 			 * OR if the last element is the card "2" and an ace exists (always at position 0 if existing),
 			 * the straight length increases by one. If the straight length is equal to 5 a valid straight is found which high card's index
 			 * (found 4 elements backwards) is saved in the array straight_high_cards leaving additional room for further straights.
-			 * 
+			 *
 			 * [2] If the element at the next position has the same value as the current element, the straight will neither be aborted nor prolonged.
-			 * 
+			 *
 			 * [3] If none of the above conditions are met, the straight length is reduced to 1.
-			 * 
+			 *
 			 * Information for Pairs, Triples and Quads:
-			 * 
+			 *
 			 * Condition 2 can also be used to determine the indices for the above named combinations. If the condition is met,
 			 * same_kind_length increments and it is checked the condition for the combination is tested. Furthermore, condition 1 and 2
 			 * must be used to reset same_kind_length to 1.
@@ -281,8 +364,8 @@ public class Player {
 				}
 			}catch(ArrayIndexOutOfBoundsException e) {}
 		}
-		
-		
+
+
 		/*
 		 * Ranking the combinations
 		 */
@@ -371,11 +454,11 @@ public class Player {
 		else {
 			return 10000000000L + (long)(combo[0].getValue())*100000000L + (long)(combo[1].getValue())*1000000L + (long)(combo[2].getValue()*10000L) + (long)(combo[3].getValue()*100L) + (long)(combo[4].getValue()*1L);
 		}
-		
+
 		//This case should not occurr
 		return -1L;
 	}
-	
+
 	//Outputs a double array containing the probability for win, tie or lose for an incomplete combination considering what the opponent might have
 	public double[] getChance() {
 		// !!! Note that this function assumes that the middle contains 5 community cards and that every player has 2 hand cards (Texas Hold'em) !!!
@@ -384,7 +467,7 @@ public class Player {
 		int simulations = 10000;
 		int players = 2;
 
-		
+
 		/*
 		 * Prepare the simulation
 		 */
@@ -400,7 +483,7 @@ public class Player {
 			exception_index++;
 		}
 		Card[] deck = Game.createDeck(exceptions);
-		
+
 		//Create an array of the community cards (mid cards) leaving room for simulated cards from deck at the last indices of the array
 		Card[] simulated_middle_cards = new Card[5];
 		for(int i = 0; i<mid.numberOfVisibleCards(); i++) {
@@ -408,18 +491,18 @@ public class Player {
 		}
 		Mid simulated_mid = new Mid();
 		simulated_mid.setCards(simulated_middle_cards);
-		
+
 		//Create an opponent with simualted hand
 		Player simulated_opponent = new Player(false,  mid);
 		Card[] opponents_cards = new Card[2];
-		
-		
+
+
 		/*
 		 * Starts the simulation
 		 */
 		int deck_index = 0;
 		for(int i = 0; i<simulations; i++) {
-			
+
 			Game.shuffle(deck);
 			//Check if players hand cards need to be filled
 			if(hand == null) {
@@ -429,21 +512,21 @@ public class Player {
 					deck_index++;
 				}
 			}
-			
+
 			//Creates a possible hand for the opponent
 			for(int j = 0; j<2; j++) {
 				opponents_cards[j] = deck[deck_index];
 				deck_index++;
 			}
 			simulated_opponent.setHand(opponents_cards);
-			
+
 			//Fills the simulated middle
 			for(int j = mid.numberOfVisibleCards(); j<5; j++) {
 				simulated_middle_cards[j] = deck[deck_index];
 				deck_index++;
 			}
 			simulated_mid.setCards(simulated_middle_cards);
-			
+
 			//Uncomment for DEBUG
 			/*
 			System.out.println("Your cards: ");
@@ -460,7 +543,7 @@ public class Player {
 			}
 			System.out.println("You have a "+checkCombo(simulated_mid)+" & the opponent has a "+simulated_opponent.checkCombo(simulated_mid));
 			*/
-			
+
 			//Compare both outcomes
 			if(checkCombo(simulated_mid) > simulated_opponent.checkCombo(simulated_mid)) {
 				wins_ties_loses[0]++;
@@ -469,11 +552,11 @@ public class Player {
 			} else {
 				wins_ties_loses[2]++;
 			}
-			
+
 			//Reset variables
 			deck_index = 0;
 		}
-		
+
 		//Print out probabilities
 		/*
 		System.out.println((double)(6000)/10000);
@@ -485,10 +568,10 @@ public class Player {
 		System.out.println("probability of losing: "+chance[2]);
 		System.out.println("Sum: "+(chance[0]+chance[1]+chance[2]));
 		*/
-		
+
 		return chance;
 	}
-	
+
 	public boolean showedCards() {
 		return showCards;
 	}
