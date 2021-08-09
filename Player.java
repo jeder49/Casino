@@ -1,5 +1,6 @@
 package Poker;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Player {
@@ -493,7 +494,7 @@ public class Player {
 		simulated_mid.setCards(simulated_middle_cards);
 
 		//Create an opponent with simualted hand
-		Player simulated_opponent = new Player(false,  mid);
+		Player simulated_opponent = new Player("bob",0,mid);
 		Card[] opponents_cards = new Card[2];
 
 

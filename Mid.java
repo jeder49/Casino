@@ -1,5 +1,8 @@
 package Poker;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Mid {
 	private Card[] card;
 	private boolean[] visible;

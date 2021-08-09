@@ -1,5 +1,7 @@
 package Poker;
 
+import java.util.Arrays;
+
 public class Game {
 
 	private Card[] deck;
