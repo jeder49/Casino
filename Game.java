@@ -1,32 +1,32 @@
 package Poker;
 
 public class Game {
-	
+
 	private Card[] deck;
 	private Player[] player;
 	private int round;
 	private Mid mid;
 	private int lastRaised;
-	
+
 	public Game(Person[] Player, int numPlayer, int bots, int numMid, int numHand, int assets, int dificulty[]) {
 		//while(a nother game){
 			//1. arrangements
 			mid = new Mid();
-			
+
 			createPlayer(Player, numPlayer, bots, assets, dificulty);
-		
+
 			deck = createDeck(null);
-		
+
 			shuffle(deck);
-		
+
 			deal(numMid, numHand);
-			
+
 			//2. shows the cards in the mid
 			for(int i = 0; i < this.mid.getCards().length; i++) {
 				Card[] mid = this.mid.getCards();
 				System.out.println("mid " + i + ": " + mid[i].toString());
 			}
-			
+
 			//shows all hands
 			for(int i = 0; i < player.length; i++) {
 				String s = "";
@@ -40,13 +40,13 @@ public class Game {
 				}
 				System.out.println("Player " + i + " : " + player[i].getName() + " : " + s);
 			}
-			
+
 			System.out.println("######################| Game starts |######################");
-			
+
 			//3. starts game
 			setRound(1);
 			round(numMid);
-			
+
 			//4. show cards
 			//the player who raised last
 			String s = "";
@@ -58,13 +58,13 @@ public class Game {
 					s = s + hand[f].toString() + " ; ";
 				}
 			}
-			
+
 			System.out.println("Player " + lastRaised + " : " + player[lastRaised].getName() + " : " + s);
-			
+
 			//the rest
 			for(int i = 0; i < player.length; i++) {
 				if(i != lastRaised) {
-					if(player[i].showCards()) {	
+					if(player[i].showCards()) {
 						s = "";
 						hand = player[i].getHand();
 						for(int f = 0; f < player[i].getHand().length; f++) {
@@ -78,13 +78,13 @@ public class Game {
 					}
 				}
 			}
-			
+
 			//5. presents winner
-			win();
+			System.out.println("Player " + player[win()].getName() +" won the game!");
 		//}
 	}
-	
-	
+
+
 	//creates a deck
 	public static Card[] createDeck(Card[] exceptions) {
 		//Creates the array to be filled
@@ -95,12 +95,12 @@ public class Game {
 		} else {
 			deck = new Card[52-exceptions.length];
 		}
-		
+
 		//Fills the deck from highest to lowest value while checking for exceptions
 		Arrays.sort(exceptions);
 		int index = 0;
 		int exception_index = 0;
-		
+
 		for(int i = 12; i>=0; i--) {
 			for(int j = 3; j>=0; j--) {
 				try {
@@ -115,11 +115,11 @@ public class Game {
 					index++;
 				}
 			}
-		}		
+		}
 		return deck;
 	}
-	
-	
+
+
 	//shuffles the cards of the deck
 	public static void shuffle(Card[] deck) {
 		for(int i = 0; i<deck.length; i++) {
@@ -130,8 +130,8 @@ public class Game {
 			deck[randomPosition] = c1;
 		}
 	}
-	
-	
+
+
 	//
 	private void createPlayer(Person[] Player,int numPlayer, int bots, int assets, int dificulty[]) {
 		//add bots to player list
@@ -139,12 +139,12 @@ public class Game {
 		for(int i = 0; i < bots; i++) {
 			player[i] = new Player(("AI"+i),dificulty[i],mid);
 		}
-		
+
 		//add people to player list
 		for(int i = 0; i < (numPlayer - bots); i++) {
 			player[i+bots] = new Player(Player[i].getName(),0,mid);
 		}
-		
+
 		//set new random position for Player
 		for(int i = 0; i < player.length; i++) {
 			int randomPosition = (int)(Math.random() * (player.length - 1));
@@ -154,8 +154,8 @@ public class Game {
 			player[randomPosition] = p1;
 		}
 	}
-	
-	
+
+
 	//deal the cards
 	private void deal(int numMid, int numHand) {
 		Card[] mid = new Card[numMid];
@@ -166,7 +166,7 @@ public class Game {
 		}
 		this.mid.setVisible(visible);
 		this.mid.setCards(mid);
-		
+
 		for(int i = 0; i < player.length; i++) {
 			Card[] hand = new Card[numHand];
 
@@ -174,12 +174,12 @@ public class Game {
 			for(int f = 0; f < numHand; f++) {
 				hand[f] = getTopCard();
 			}
-			
+
 			player[i].setHand(hand);
 		}
 	}
-	
-	
+
+
 	//get card top card of the deck and deletes it
 	private Card getTopCard() {
 		int i = deck.length-1;
@@ -190,140 +190,153 @@ public class Game {
 		deck[i] = null;
 		return card;
 	}
-	
+
 	public void changePositionPlayer(){
 		//to do
 	}
-	
-	//
+
 	private void round(int numMid){
-		
-		//set role
-		
-		//get small blind
-		int index = getPlayerByRole(1);
-		
-		//if no round was played before and new roles has to be made
-		if(index == -1) {
-			
-			player[0].setRole(1);
-			player[1].setRole(2);
-		
-		}else {
-			
-			for(int i = 1; i < 3; i++) {
-			
-				if((index+1) > player.length) {
-					
-					index++;
-					player[index].setRole(i);
-				
+			//turn cards
+			if(round == 2) {
+				mid.setVisible(0, true);
+				mid.setVisible(1, true);
+				mid.setVisible(2, true);
+			}if(round > 2) {
+				mid.setVisible(round, true);
+			}
+
+			//show cards
+			boolean[] visible = mid.isVisible();
+			Card[] c = mid.getCards();
+			for(int i = 0; i < mid.getCards().length; i++) {
+				if(visible[i] == true) {
+					System.out.println(" | " + c[i].toString() + " |");
 				}else {
-				
-					index = 0;
-					player[index].setRole(i);
-				
+					System.out.println(" | ????-? |");
+				}
+			}
+
+			//set role
+
+			//get small blind
+			int index = getPlayerByRole(1);
+
+			//if no round was played before and new roles has to be made
+			if(index == -1) {
+
+				player[0].setRole(1);
+				player[1].setRole(2);
+
+			}else {
+
+				for(int i = 1; i < 3; i++) {
+
+					if((index+1) > player.length) {
+
+						index++;
+						player[index].setRole(i);
+
+					}else {
+
+						index = 0;
+						player[index].setRole(i);
+
+					}
+
 				}
 
 			}
-			
-		}
-		
-		//first bets
-		if(round == 1) {
-			
-			//bet small blind
-			player[getPlayerByRole(1)].setBet(1);
-			
-			//bet big blind
-			player[getPlayerByRole(2)].setBet(2);
-		}
-		
-		//recursion ends when...
-		
-		//...all cards are open
-		if(round == numMid) {
-			//the person who last raisted has to show their cards 
-			return;
-		}
-		
-		//...last man standing
-		if(howManyleft() == 1) {
-			round++;
-			round(numMid);
-			return;
-		}
-		
-		//...all in
-		if(isAllIn()) {
-			round++;
-			round(numMid);
-			return;
-		}
-		
-		//turn cards
-		if(round == 2) {
-			mid.setVisible(0, true);
-			mid.setVisible(1, true);
-			mid.setVisible(2, true);
-		}if(round > 2) {
-			mid.setVisible(round, true);
-		}
-		
-		
-		//till all bets are the same height or only one is left
-		while(!sameBetHight() && howManyleft() != 1) {
-			
-			int i;
-			
+
+			//first bets (first round)
 			if(round == 1) {
-				
+
+				//bet small blind
+				player[getPlayerByRole(1)].setBet(1);
+
+				//bet big blind
+				player[getPlayerByRole(2)].setBet(2);
+			}
+
+			//recursion ends when...
+
+			//...all cards are open
+			if(round == numMid) {
+				//the person who last raisted has to show their cards
+				return;
+			}
+
+			//...last man standing
+			if(howManyleft() == 1) {
+				round++;
+				round(numMid);
+				return;
+			}
+
+			//...all in
+			if(isAllIn()) {
+				round++;
+				round(numMid);
+				return;
+			}
+
+
+			int i;
+
+			//get first player for the round
+			if(round == 1) {
+
 				if((getPlayerByRole(2) + 1) >= player.length) {
 					i = 0;
 				}else {
 					i = getPlayerByRole(2) + 1;
 				}
 				lastRaised = getPlayerByRole(2);
-				
-			}else {	
-				
+
+			}else {
+
 				//index small blind
 				i = getPlayerByRole(1);
 				lastRaised = i;
-				
+
 			}
-			
-			//if player is small blind
-			if(player[i].getRole() == 1) {
-				if(player[i].decide(null) == 1) {
-					lastRaised = i;
-				}
-			}else {
-				//if index is out of range
-				if(i-1 < 0) {
-					
-					if(player[i].decide(player[player.length-1]) == 1){
+
+
+			//till all bets are the same height or only one is left
+			while(!sameBetHight() && howManyleft() != 1) {
+
+				//if player is small blind
+				if(player[i].getRole() == 1) {
+					if(player[i].decide(null) == 1) {
 						lastRaised = i;
 					}
-					
-				}
-				else {
-					
-					if(player[i].decide(player[i-1]) == 1) {
-						lastRaised = i;
+				}else {
+					//if index is out of range
+					if(i-1 < 0) {
+						if(player[i].decide(player[player.length-1]) == 1){
+							lastRaised = i;
+						}
+
 					}
-					
+					else {
+						if(player[i].decide(player[i-1]) == 1) {
+							lastRaised = i;
+						}
+
+					}
 				}
+				if((i + 1) < player.length) {
+					i++;
+				}else {
+					i = 0;
+				}
+				System.out.println("------------------------------------------");
 			}
-			
-			System.out.println("------------------------------------------");
+
+			//recursion
+			round++;
+			round(numMid);
 		}
-		
-		//recursion
-		round++;
-		round(numMid);
-	}
-	
+
 	//BEGIN help methods [round]
 	//
 	private int getPlayerByRole(int role){
@@ -334,7 +347,7 @@ public class Game {
 		}
 		return -1;
 	}
-	
+
 	private boolean sameBetHight() {
 		int max = playerWithHightestBet();
 		for(int i = 0; i < player.length; i++) {
@@ -344,7 +357,7 @@ public class Game {
 		}
 		return true;
 	}
-	
+
 	private int playerWithHightestBet() {
 		int max = -1;
 		int index = 0;
@@ -356,7 +369,7 @@ public class Game {
 		}
 		return index;
 	}
-	
+
 	private int howManyleft() {
 		int num = 0;
 		for(int i = 0; i < player.length; i++) {
@@ -366,7 +379,7 @@ public class Game {
 		}
 		return num;
 	}
-	
+
 	private boolean isAllIn() {
 		for(int i = 0; i < player.length; i++) {
 			if(player[i].isAllIn()) {
@@ -376,13 +389,13 @@ public class Game {
 		return false;
 	}
 	//END help methods [round]
-	
+
 	//returns winner
 	private int win() {
 		//get best combination of all player, who showed their cards
 		int max = lastRaised;
 		for(int i = 0; i < player.length; i++) {
-			if(player[i].showedCards() && !player[i].hasFolded() && player[i].getBest() > player[max].getBest()) {
+			if(player[i].showedCards() && !player[i].hasFolded() && player[i].checkCombo() > player[max].checkCombo()) {
 				max = i;
 			}
 		}
