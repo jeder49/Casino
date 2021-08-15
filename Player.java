@@ -26,213 +26,230 @@ public class Player {
 	//what to do
 		//get priviouse player to compare bet
 		public int decide(Player p) {
-			if(ai == 0) {
-				Scanner sc = new Scanner(System.in);
-
-				int value;
-
-				if(p != null) {
-					//value for own bet
-					if(!p.isAllIn()) {
-						value = p.getBet();
-					}else {
-						value = getAssets();
-					}
+			int value;
+			int choice = 0;
+			Scanner sc = new Scanner(System.in);
+			
+			if(p != null) {
+				//value for own bet
+				if(!p.isAllIn()) {
+					value = p.getBet();
 				}else {
-					value = getBet();
-				}
-
-				boolean b = true;
-				while(b) {
-					System.out.println("+----------------------+");
-					System.out.println("|Do you want to:       |");
-
-					//there is no player before this player this round
-					if(p == null) {
-						//check
-						System.out.println("|+ check	       |");
-
-						//bet
-						System.out.println("|+ bet		       |");
-
-						//fold
-						System.out.println("|+ fold		       |");
-
-						//all in
-						System.out.println("|+ allIn	       |");
-					}else {
-						if(p.getBet() <= getAssets() && !p.isAllIn()) {
-							//call
-							System.out.println("|+ call	           |");
-
-							//raise
-							System.out.println("|+ raise	       |");
-						}
-
-						//fold
-						System.out.println("|+ fold	       	   |");
-
-						//all in
-						System.out.println("|+ allIn	       |");
-					}
-					System.out.print("[" + name + "] chooses: ");
-					String s = sc.next();
-					System.out.println("+----------------------+");
-
-					switch(s) {
-						case "call":
-							if(p != null) {
-								setAssets(getAssets() - (value - getBet()));
-								setBet(value);
-								return 0;
-							}else {
-								System.out.println("Don't try to mess with the Casino!");
-							}
-						break;
-						case "raise":
-							if(p != null) {
-								System.out.println("raise to: ");
-								int input = sc.nextInt();
-								//if raise is lower than the bet player has to choose again
-								if(input < p.getBet()) {
-									b = true;
-								}
-								//all in
-								else if(input > getBet() + getAssets()) {
-									//get every thing you bet before
-									setAssets(getBet() + getAssets());
-									//bet is set to 0
-									setBet(0);
-									//set all in
-									setAllIn(true);
-									//create a pot
-									Pot pot = new Pot(getAssets());
-									//add player to pot -> player puts all his money in the pot
-									pot.addPlayer(this);
-									//add pot in the mid so that everyone can join
-									mid.addPot(pot);
-									return 3;
-								}
-								//normal raise
-								else {
-									//set bet
-									setBet(input);
-									//subtract asset
-									setAssets(getAssets() - input);
-									return 1;
-								}
-							}else {
-								System.out.println("Don't try to mess with the Casino!");
-							}
-						break;
-						case "fold":
-							setFold(true);
-							return 2;
-						case "allIn":
-							//get every thing you bet before
-							setAssets(getBet() + getAssets());
-							//bet is set to 0
-							setBet(0);
-							//set all in
-							setAllIn(true);
-							if(!mid.hasPot()) {
-								//create a pot
-								Pot pot = new Pot(getAssets());
-								//add player to pot -> player puts all his money in the pot
-								pot.addPlayer(this);
-								//add pot in the mid so that everyone can join
-								mid.addPot(pot);
-								return 3;
-							}else {
-								int i = 0;
-								while(mid.getPot(i) != null) {
-									if(mid.getPot(i).getBetHight() > getAssets()) {
-										mid.getPot(i).addPlayer(this);
-									}else {
-										mid.getPot(i).addPlayer(this);
-										return 3;
-									}
-									i++;
-								}
-								if(getAssets() > 0) {
-									//create a pot
-									Pot pot = new Pot(getAssets());
-									//add player to pot -> player puts all his money in the pot
-									pot.addPlayer(this);
-									//add pot in the mid so that everyone can join
-									mid.addPot(pot);
-								}
-								return 3;
-							}
-
-						case "check":
-							if(p == null) {
-								return 4;
-							}else {
-								System.out.println("Don't try to mess with the Casino!");
-							}
-						break;
-						case "bet":
-							if(p == null) {
-								System.out.println("you choose: ");
-								value = sc.nextInt();
-								if(value < 0) {
-									System.out.println("Don't try to mess with the Casino!");
-								}else if(value > getAssets()) {
-									//get every thing you bet before
-									setAssets(getBet() + getAssets());
-									//bet is set to 0
-									setBet(0);
-									//set all in
-									setAllIn(true);
-									//create a pot
-									Pot pot = new Pot(getAssets());
-									//add player to pot -> player puts all his money in the pot
-									pot.addPlayer(this);
-									//add pot in the mid so that everyone can join
-									mid.addPot(pot);
-									return 3;
-								}else {
-									setAssets(getAssets() - value);
-									setBet(value);
-									return 5;
-								}
-							}else {
-								System.out.println("Don't try to mess with the Casino!");
-							}
-						break;
-					}
+					value = getAssets();
 				}
 			}else {
-				switch(ai) {
-					case 1:
+				value = getBet();
+			}
+			
+			boolean b = true;
+			while(b) {
+				
+				if(ai == 0) {
+						//print out choices
+						System.out.println("+----------------------+");
+						System.out.println("|Do you want to:       |");
+						
+						//there is no player before this player this round
+						if(p == null) {
+							if(mid.getRound() != 1) {
+								//check
+								System.out.println("|+ check	       |");
+								
+								//fold
+								System.out.println("|+ fold		       |");
+							}
+							
+							//bet
+							System.out.println("|+ bet		       |");
+	
+							//all in
+							System.out.println("|+ allIn	       |");
+						}else {
+							if(p.getBet() <= getAssets() && !mid.hasPot()) {
+								//call
+								System.out.println("|+ call	           |");
+	
+								//raise
+								System.out.println("|+ raise	       |");
+							}
+	
+							//fold
+							System.out.println("|+ fold	       	   |");
+	
+							//all in
+							System.out.println("|+ allIn	       |");
+						}
+						System.out.print("[" + name + "] chooses: ");
+						String s = sc.next();
+						System.out.println("+----------------------+");
+						switch(s) {
+							case "call": choice = 0;
+							break;
+							case "raise": choice = 1;
+								System.out.println("raise by: ");
+								int input = sc.nextInt();
+								value = value + input;
+							break;
+							case "fold": choice = 2;
+							break;
+							case "allIn": choice = 3;
+							break;
+							case "check": choice = 4;
+							break;
+							case "bet": choice = 5;
+								System.out.println("you bet: ");
+								value = sc.nextInt();
+							break;
+							default:;
+						}
+					
+					
+				}
+				//BOT
+				else {
+					double [] chance = getChance();
+					int allIn = (int)(Math.random()*100);
+					choice = (int)(Math.random()*5);
+					switch(ai) {
 						//level 1: random
-						boolean b = false;
-						while(b) {
-							int random = (int)(Math.random()*5);
-							if(p==null) {
-
+						case 1:
+							if(choice == 1) {//raise
+								value = (int)(Math.random() * 25);
+							}else if(choice == 5) {//bet
+								value = (int)(Math.random() * 10);
+							}
+						break;
+						//level 2: normal (when chance >= ...)
+						case 2:
+							//choice = choice * chance[0] * chance[1];
+						break;
+						//level 3: 
+						case 3:
+							
+						break;
+						//level 4: OP(sees every thing, can bluff)
+						case 4:
+							
+						break;
+					}
+				}
+				
+				//get choice details catch false input
+				switch(choice) {
+					//call
+					case 0:
+						if(p != null && p.getBet() <= getAssets() && !mid.hasPot()) {
+							if(call(value) != -1) {
+								return 0;
+							}
+						}else {
+							
+						}
+					break;
+					//raise
+					case 1:
+						if(p != null && p.getBet() <= getAssets() && !mid.hasPot()) {
+							if(raise(value) != -1) {
+								return 1;
 							}
 						}
 					break;
+					//fold
 					case 2:
-						//level 2: normal (when checkcombo/chance >= ...)
-						;
-					break;
+						choice = 2;
+						if(mid.getRound() != 1 || p != null) {
+							System.out.println(" ! "+getName() + " decided to fold.");
+							setFold(true);
+							return 2;
+						}
+					//allIn
 					case 3:
-						//level3: OP(sees every thing, only plays when he wins)
-						;
-					break;
+						return allIn();
+					//check
 					case 4:
-						//level4: OP(sees every thing, can bluff)
-						;
+						if(p == null && mid.getRound() != 1) {
+							System.out.println(" ! "+getName() + " decided to check.");
+							return 4;
+						}
 					break;
+					//bet
+					case 5:
+						if(p == null) {
+							if(value < 0) {}
+							//all in
+							else if(value > getAssets()) {
+								return allIn();
+							}
+							//normal bet
+							else {
+								System.out.println(" ! "+getName() + " decided to bet: " + value);
+								setAssets(getAssets() - value);
+								setBet(value);
+								return 5;
+							}
+						}
+					break;
+					default:;
 				}
-				System.out.println("[Ai]: I choose you!");
 			}
 			return -1;
 		}
+	//BEGIN help methods [decide]
+	private int call(int value) {
+		System.out.println(" ! "+getName() + " decided to call.");
+		setAssets(getAssets() - (value - getBet()));
+		setBet(value);
+		return 0;
+	}
+	private int raise(int raiseBy) {
+			//if raise is lower than the bet player has to choose again
+			if(raiseBy < 0) {
+				return -1;
+			}
+			//all in
+			else if(raiseBy > getAssets()) {
+				return allIn();
+			}
+			//normal raise
+			else {
+				System.out.println(" ! "+getName() + " decided to raise to: " + (getBet() + raiseBy));
+				setBet( getBet() + raiseBy);
+				setAssets(getAssets() - raiseBy);
+				return 1;
+			}
 
+	}
+	private int allIn() {
+		System.out.println(" ! "+getName() + " decided to go all in.");
+		setAssets(getBet() + getAssets());
+		setBet(0);
+		setAllIn(true);
+		if(!mid.hasPot()) {
+			Pot pot = new Pot(getAssets());
+			pot.addPlayer(this);
+			mid.addPot(pot);
+			return 3;
+		}else {
+			int i = 0;
+			while(mid.getPot(i) != null) {
+				if(mid.getPot(i).getBetHight() > getAssets()) {
+					mid.getPot(i).addPlayer(this);
+				}else {
+					mid.getPot(i).addPlayer(this);
+					return 3;
+				}
+				i++;
+			}
+			if(getAssets() > 0) {
+				Pot pot = new Pot(getAssets());
+				pot.addPlayer(this);
+				mid.addPot(pot);
+			}
+			return 3;
+		}
+	}
+	//END help methods [decide]
+	
 	public long checkCombo(Mid middle) {
 
 		/*

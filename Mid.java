@@ -7,6 +7,7 @@ public class Mid {
 	private Card[] card;
 	private boolean[] visible;
 	private List<Pot> pot = new ArrayList<Pot>();
+	private Game game;
 
 	public Mid() {
 	}
@@ -47,5 +48,23 @@ public class Mid {
 		}
 		boolean hasPot = !pot.isEmpty();
 		return hasPot;
+	}
+	public Player[] getPlayer() {
+		return game.getPlayer();
+	}
+
+	public int getRound() {
+		return game.getRound();
+	}
+
+	public void setRound(int round) {
+		game.setRound(round);
+	}
+	public Game getGame() {
+		return game;
+	}
+
+	public void setGame(Game game) {
+		this.game = game;
 	}
 }
